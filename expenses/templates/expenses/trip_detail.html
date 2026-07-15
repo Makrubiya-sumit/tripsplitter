@@ -1,0 +1,257 @@
+{% extends 'base.html' %}
+{% block title %}{{ trip.name }} - Trip Expense Splitter{% endblock %}
+{% block content %}
+
+<div class="trip-hero mb-4">
+  <div>
+    <span class="eyebrow"><i class="bi bi-airplane-engines"></i> Trip workspace</span>
+    <h3 class="fw-bold mb-1">{{ trip.name }}</h3>
+    <p class="text-muted mb-0">
+      {% if trip.destination %}<i class="bi bi-geo-alt"></i> {{ trip.destination }} &middot;{% endif %}
+      {% if trip.start_date %}{{ trip.start_date }} - {{ trip.end_date }}{% endif %}
+    </p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{% url 'trip_expenses_export' trip.pk %}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Download Excel</a>
+    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTripModal"><i class="bi bi-trash"></i> Delete</button>
+  </div>
+</div>
+
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'members' %}active{% endif %}" href="?tab=members">
+      <i class="bi bi-people"></i> Members ({{ members.count }})
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'expenses' %}active{% endif %}" href="?tab=expenses">
+      <i class="bi bi-receipt"></i> Expenses ({{ expenses.count }})
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if tab == 'summary' %}active{% endif %}" href="?tab=summary">
+      <i class="bi bi-bar-chart"></i> Summary
+    </a>
+  </li>
+</ul>
+
+{% if tab == 'members' %}
+  <div class="row g-3">
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header">Trip Members</div>
+        <div class="card-body">
+          {% for member in members %}
+            <div class="list-row">
+              <div class="d-flex align-items-center">
+                <div class="avatar-circle">{{ member.name|slice:":1"|upper }}</div>
+                <span>{{ member.name }}</span>
+              </div>
+              <form method="post" action="{% url 'member_remove' trip.pk member.pk %}"
+                    onsubmit="return confirm('Remove {{ member.name }} from this trip?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i></button>
+              </form>
+            </div>
+          {% empty %}
+            <div class="empty-state">
+              <i class="bi bi-people" style="font-size:2rem;"></i>
+              <p class="mt-2 mb-0">No members yet. Add the people going on this trip.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="card">
+        <div class="card-header">Add Member</div>
+        <div class="card-body">
+          <form method="post" action="{% url 'member_add' trip.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Name</label>
+              {{ member_form.name }}
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Add Member</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% elif tab == 'expenses' %}
+  <div class="row g-3">
+    <div class="col-md-7">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Expenses</span>
+          <a href="{% url 'trip_expenses_export' trip.pk %}" class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i> Excel</a>
+        </div>
+        <div class="card-body">
+          {% for expense in expenses %}
+            <div class="list-row">
+              <div>
+                <div class="fw-semibold">{{ expense.title }} <span class="text-primary">₹{{ expense.amount|floatformat:2 }}</span></div>
+                <div class="text-muted small">Paid by {{ expense.paid_by.name }} &middot; {{ expense.date }}</div>
+              </div>
+              <div class="d-flex gap-1">
+                <a href="{% url 'expense_edit' trip.pk expense.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{% url 'expense_delete' trip.pk expense.pk %}"
+                      onsubmit="return confirm('Delete this expense?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </div>
+          {% empty %}
+            <div class="empty-state">
+              <i class="bi bi-receipt" style="font-size:2rem;"></i>
+              <p class="mt-2 mb-0">No expenses logged yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="card">
+        <div class="card-header">Add Expense</div>
+        <div class="card-body">
+          {% if members.count == 0 %}
+            <p class="text-muted small">Add at least one member before logging expenses.</p>
+          {% else %}
+            <form method="post" action="{% url 'expense_add' trip.pk %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label class="form-label">Title</label>
+                {{ expense_form.title }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Amount (₹)</label>
+                {{ expense_form.amount }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Paid By</label>
+                {{ expense_form.paid_by }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Date</label>
+                {{ expense_form.date }}
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Notes</label>
+                {{ expense_form.notes }}
+              </div>
+              <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Add Expense</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% elif tab == 'summary' %}
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header">Summary</div>
+        <div class="card-body">
+          <div class="alert alert-success py-2">
+            Total Expense: <strong>₹{{ trip.total_expense|floatformat:2 }}</strong><br>
+            Each Person Should Pay: <strong>₹{{ trip.per_person_share|floatformat:2 }}</strong>
+          </div>
+          {% for member in members %}
+            <div class="list-row">
+              <div>
+                <div class="fw-semibold">{{ member.name }}</div>
+                <div class="text-muted small">Paid: ₹{{ member.total_paid|floatformat:2 }} &middot; Share: ₹{{ trip.per_person_share|floatformat:2 }}</div>
+              </div>
+              {% if member.adjusted_balance > 0 %}
+                <span class="balance-positive">You get back ₹{{ member.adjusted_balance|floatformat:2 }}</span>
+              {% elif member.adjusted_balance < 0 %}
+                <span class="balance-negative">Owes ₹{{ member.adjusted_balance|floatformat:2|slice:"1:" }}</span>
+              {% else %}
+                <span class="balance-zero">Settled up</span>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header">Settlements (Simplified)</div>
+        <div class="card-body">
+          {% if settlement_suggestions %}
+            <p class="text-muted small">Below is the simplified settlement list (minimum transactions).</p>
+            {% for s in settlement_suggestions %}
+              <div class="list-row">
+                <div>
+                  <span class="fw-semibold">{{ s.from.name }}</span>
+                  <i class="bi bi-arrow-right settlement-arrow"></i>
+                  <span class="fw-semibold">{{ s.to.name }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="balance-negative">₹{{ s.amount|floatformat:2 }}</span>
+                  <form method="post" action="{% url 'settlement_record' trip.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="from_member" value="{{ s.from.pk }}">
+                    <input type="hidden" name="to_member" value="{{ s.to.pk }}">
+                    <input type="hidden" name="amount" value="{{ s.amount }}">
+                    <button type="submit" class="btn btn-sm btn-outline-success">Mark Paid</button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+            <div class="text-end fw-semibold mt-2">
+              Total Settlement: ₹{{ settlement_suggestions|length }} transaction(s)
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <i class="bi bi-check-circle" style="font-size:2rem;color:var(--success);"></i>
+              <p class="mt-2 mb-0">Everyone is settled up! 🎉</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if recorded_settlements %}
+        <div class="card">
+          <div class="card-header">Payment History</div>
+          <div class="card-body">
+            {% for r in recorded_settlements %}
+              <div class="list-row">
+                <div>{{ r.from_member.name }} <i class="bi bi-arrow-right settlement-arrow"></i> {{ r.to_member.name }}</div>
+                <div class="text-muted small">₹{{ r.amount|floatformat:2 }} &middot; {{ r.settled_on }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- Delete trip modal -->
+<div class="modal fade" id="deleteTripModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete "{{ trip.name }}"?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        This will permanently delete the trip, its members, expenses, and settlement history. This cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'trip_delete' trip.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete Trip</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

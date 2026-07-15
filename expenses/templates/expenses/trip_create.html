@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Create New Trip{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">Create New Trip</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Trip Name</label>
+            {{ form.name }}
+            {% for error in form.name.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Destination</label>
+            {{ form.destination }}
+          </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">Start Date</label>
+              {{ form.start_date }}
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">End Date</label>
+              {{ form.end_date }}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Create Trip</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

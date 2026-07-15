@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Trip Expense Splitter{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="fw-bold mb-0">Welcome back, {{ user.username }} 👋</h3>
+    <p class="text-muted mb-0">Here's an overview of your trips.</p>
+  </div>
+  <a href="{% url 'trip_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create Trip</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-label">Total Trips</div>
+      <div class="stat-value">{{ total_trips }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-label">Total Members</div>
+      <div class="stat-value">{{ total_members }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card">
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-value">₹{{ total_expenses|floatformat:2 }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Recent Trips</div>
+  <div class="card-body">
+    {% if recent_trips %}
+      {% for trip in recent_trips %}
+        <div class="list-row">
+          <div>
+            <div class="fw-semibold">{{ trip.name }}</div>
+            <div class="text-muted small">
+              {% if trip.start_date %}{{ trip.start_date }} - {{ trip.end_date }}{% else %}No dates set{% endif %}
+              &middot; {{ trip.member_count }} members &middot; ₹{{ trip.total_expense|floatformat:2 }} spent
+            </div>
+          </div>
+          <a href="{% url 'trip_detail' trip.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-airplane" style="font-size:2rem;"></i>
+        <p class="mt-2 mb-0">No trips yet. Create your first trip to get started!</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

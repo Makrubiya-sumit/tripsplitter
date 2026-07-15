@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Edit Expense{% endblock %}
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">Edit Expense — {{ trip.name }}</div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            {{ form.title }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Amount (₹)</label>
+            {{ form.amount }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Paid By</label>
+            {{ form.paid_by }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            {{ form.date }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Notes</label>
+            {{ form.notes }}
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Save Changes</button>
+            <a href="{% url 'trip_detail' trip.pk %}?tab=expenses" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
