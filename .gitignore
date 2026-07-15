@@ -1,6 +1,21 @@
-vnv/
-__pycache__/
+# Python
 *.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Django
+*.sqlite3
 db.sqlite3
+*.log
+/staticfiles/
+/media/
+
+# Virtualenv
+vnv/
+venv/
 .env
-staticfiles/
+
+# IDE files
+.vscode/
+.idea/
