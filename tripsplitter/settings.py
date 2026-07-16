@@ -21,7 +21,7 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "tripsplitter-1.onrender.com",
+    "tripsplitter-f3o7.onrender.com",
 ]
 
 
