@@ -15,9 +15,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-CHANGE-THIS-KEY-BEFOR
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.environ.get(
-    'ALLOWED_HOSTS', 'localhost,127.0.0.1,tripsplitter-f3o7.onrender.com'
-).split(',')
+# ALLOWED_HOSTS = os.environ.get(
+#     'ALLOWED_HOSTS', 'localhost,127.0.0.1,tripsplitter-f3o7.onrender.com'
+# ).split(',')
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "tripsplitter-1.onrender.com",
+]
 
 
 # Application definition
