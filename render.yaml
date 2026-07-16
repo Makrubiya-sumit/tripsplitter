@@ -4,6 +4,7 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
     startCommand: gunicorn tripsplitter.wsgi:application
+    releaseCommand: python manage.py migrate
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
