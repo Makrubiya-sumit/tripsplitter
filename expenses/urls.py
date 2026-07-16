@@ -23,6 +23,7 @@ urlpatterns = [
     # Expenses
     path('trips/<int:pk>/expenses/add/', views.expense_add, name='expense_add'),
     path('trips/<int:pk>/expenses/export/', views.trip_expenses_export, name='trip_expenses_export'),
+    path('trips/<int:pk>/report/pdf/', views.trip_report_pdf, name='trip_report_pdf'),
     path('trips/<int:pk>/expenses/<int:expense_id>/edit/', views.expense_edit, name='expense_edit'),
     path('trips/<int:pk>/expenses/<int:expense_id>/delete/', views.expense_delete, name='expense_delete'),
 

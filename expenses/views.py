@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
-from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -10,7 +9,7 @@ from django.views.generic import CreateView
 
 from .forms import RegisterForm, TripForm, MemberForm, ExpenseForm, SettlementForm
 from .models import Trip, Member, Expense, Settlement
-from .utils import build_trip_workbook, simplify_settlements
+from .utils import build_trip_pdf, build_trip_workbook, simplify_settlements
 
 
 class CustomLoginView(LoginView):
@@ -41,12 +40,12 @@ def dashboard(request):
     trips = Trip.objects.filter(created_by=request.user)
     total_trips = trips.count()
     total_members = Member.objects.filter(trip__in=trips).count()
-    total_expenses = Expense.objects.filter(trip__in=trips).aggregate(total=Sum('amount'))['total'] or 0
+    expense_count = Expense.objects.filter(trip__in=trips).count()
     recent_trips = trips[:5]
     context = {
         'total_trips': total_trips,
         'total_members': total_members,
-        'total_expenses': total_expenses,
+        'expense_count': expense_count,
         'recent_trips': recent_trips,
     }
     return render(request, 'expenses/dashboard.html', context)
@@ -164,7 +163,7 @@ def expense_delete(request, pk, expense_id):
 
 @login_required
 def trip_expenses_export(request, pk):
-    """Download this trip's expenses and totals as an Excel workbook."""
+    """Download a full Excel report for this trip."""
     trip = _get_owned_trip_or_404(request.user, pk)
     expenses = trip.expenses.select_related('paid_by')
     filename = ''.join(char if char.isalnum() or char in (' ', '-', '_') else '' for char in trip.name)
@@ -175,6 +174,18 @@ def trip_expenses_export(request, pk):
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
     response['Content-Disposition'] = f'attachment; filename="{filename}-expenses.xlsx"'
+    return response
+
+
+@login_required
+def trip_report_pdf(request, pk):
+    """Download a designed PDF report with expenses and settlement information."""
+    trip = _get_owned_trip_or_404(request.user, pk)
+    expenses = trip.expenses.select_related('paid_by')
+    filename = ''.join(char if char.isalnum() or char in (' ', '-', '_') else '' for char in trip.name)
+    filename = (filename.strip().replace(' ', '-') or 'trip-report')[:80]
+    response = HttpResponse(build_trip_pdf(trip, expenses), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}-report.pdf"'
     return response
 
 
@@ -191,7 +202,7 @@ def settlement_record(request, pk):
             messages.success(
                 request,
                 f"Recorded: {settlement.from_member.name} paid {settlement.to_member.name} "
-                f"₹{settlement.amount}."
+                f"{trip.currency_symbol}{settlement.amount}."
             )
         else:
             messages.error(request, "Could not record settlement.")

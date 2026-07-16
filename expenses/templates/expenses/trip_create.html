@@ -5,7 +5,7 @@
 <div class="row justify-content-center">
   <div class="col-md-6">
     <div class="card">
-      <div class="card-header">Create New Trip</div>
+      <div class="card-header"><span class="eyebrow mb-1">Start a new adventure</span><div>Create a trip</div></div>
       <div class="card-body">
         <form method="post">
           {% csrf_token %}
@@ -17,6 +17,11 @@
           <div class="mb-3">
             <label class="form-label">Destination</label>
             {{ form.destination }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label"><i class="bi bi-currency-exchange me-1"></i>Trip currency</label>
+            {{ form.currency }}
+            <div class="form-text">All expenses and settlements in this trip use this currency.</div>
           </div>
           <div class="row">
             <div class="col-6 mb-3">

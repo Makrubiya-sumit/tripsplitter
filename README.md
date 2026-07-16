@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# tripsplitter
-tripsplitter projct
-=======
 # ✈️ Trip Expense Splitter
 
 A full-stack Django app that lets you create a trip, add members, log expenses,
@@ -155,9 +151,22 @@ Before deploying anywhere public:
    easily) — just swap the `DATABASES` setting.
 5. Run `python manage.py collectstatic` and serve static files (e.g. with WhiteNoise).
 
+### Render configuration
+
+The included `render.yaml` deploys the app with the correct production static
+asset setup. If you are updating the existing Render service instead of creating
+a Blueprint service, set these values in the Render dashboard and deploy again:
+
+- **Build Command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput`
+- **Start Command:** `gunicorn tripsplitter.wsgi:application`
+- **Environment variables:** `DEBUG=False`, a generated `SECRET_KEY`, and
+  `ALLOWED_HOSTS=tripsplitter-f3o7.onrender.com`
+
+The build command is required: it copies and fingerprints `static/css/style.css`
+so WhiteNoise can serve the same custom CSS in Render that Django serves locally.
+
 ---
 
 Happy building! This project (Django + auth + relational models + a real
 calculation algorithm + a clean UI) is genuinely a strong portfolio piece —
 it shows backend logic, not just CRUD.
->>>>>>> e489988 (Initial TripSplit project)

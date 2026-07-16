@@ -4,7 +4,7 @@
 
 <div class="trip-hero mb-4">
   <div>
-    <span class="eyebrow"><i class="bi bi-airplane-engines"></i> Trip workspace</span>
+    <span class="eyebrow"><i class="bi bi-compass"></i> Trip workspace &middot; {{ trip.currency }}</span>
     <h3 class="fw-bold mb-1">{{ trip.name }}</h3>
     <p class="text-muted mb-0">
       {% if trip.destination %}<i class="bi bi-geo-alt"></i> {{ trip.destination }} &middot;{% endif %}
@@ -12,7 +12,8 @@
     </p>
   </div>
   <div class="d-flex gap-2 flex-wrap">
-    <a href="{% url 'trip_expenses_export' trip.pk %}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Download Excel</a>
+    <a href="{% url 'trip_report_pdf' trip.pk %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-pdf"></i> PDF Report</a>
+    <a href="{% url 'trip_expenses_export' trip.pk %}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Excel Report</a>
     <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteTripModal"><i class="bi bi-trash"></i> Delete</button>
   </div>
 </div>
@@ -85,13 +86,13 @@
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <span>Expenses</span>
-          <a href="{% url 'trip_expenses_export' trip.pk %}" class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i> Excel</a>
+          <div class="d-flex gap-1"><a href="{% url 'trip_report_pdf' trip.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-file-earmark-pdf"></i> PDF</a><a href="{% url 'trip_expenses_export' trip.pk %}" class="btn btn-sm btn-outline-success"><i class="bi bi-download"></i> Excel</a></div>
         </div>
         <div class="card-body">
           {% for expense in expenses %}
             <div class="list-row">
               <div>
-                <div class="fw-semibold">{{ expense.title }} <span class="text-primary">₹{{ expense.amount|floatformat:2 }}</span></div>
+                <div class="fw-semibold">{{ expense.title }} <span class="text-primary">{{ trip.currency_symbol }}{{ expense.amount|floatformat:2 }}</span></div>
                 <div class="text-muted small">Paid by {{ expense.paid_by.name }} &middot; {{ expense.date }}</div>
               </div>
               <div class="d-flex gap-1">
@@ -126,7 +127,7 @@
                 {{ expense_form.title }}
               </div>
               <div class="mb-3">
-                <label class="form-label">Amount (₹)</label>
+                <label class="form-label">Amount ({{ trip.currency_symbol }} {{ trip.currency }})</label>
                 {{ expense_form.amount }}
               </div>
               <div class="mb-3">
@@ -156,19 +157,19 @@
         <div class="card-header">Summary</div>
         <div class="card-body">
           <div class="alert alert-success py-2">
-            Total Expense: <strong>₹{{ trip.total_expense|floatformat:2 }}</strong><br>
-            Each Person Should Pay: <strong>₹{{ trip.per_person_share|floatformat:2 }}</strong>
+            Total Expense: <strong>{{ trip.currency_symbol }}{{ trip.total_expense|floatformat:2 }}</strong><br>
+            Each Person Should Pay: <strong>{{ trip.currency_symbol }}{{ trip.per_person_share|floatformat:2 }}</strong>
           </div>
           {% for member in members %}
             <div class="list-row">
               <div>
                 <div class="fw-semibold">{{ member.name }}</div>
-                <div class="text-muted small">Paid: ₹{{ member.total_paid|floatformat:2 }} &middot; Share: ₹{{ trip.per_person_share|floatformat:2 }}</div>
+                <div class="text-muted small">Paid: {{ trip.currency_symbol }}{{ member.total_paid|floatformat:2 }} &middot; Share: {{ trip.currency_symbol }}{{ member.fair_share|floatformat:2 }}</div>
               </div>
               {% if member.adjusted_balance > 0 %}
-                <span class="balance-positive">You get back ₹{{ member.adjusted_balance|floatformat:2 }}</span>
+                <span class="balance-positive">You get back {{ trip.currency_symbol }}{{ member.adjusted_balance|floatformat:2 }}</span>
               {% elif member.adjusted_balance < 0 %}
-                <span class="balance-negative">Owes ₹{{ member.adjusted_balance|floatformat:2|slice:"1:" }}</span>
+                <span class="balance-negative">Owes {{ trip.currency_symbol }}{{ member.adjusted_balance|floatformat:2 }}</span>
               {% else %}
                 <span class="balance-zero">Settled up</span>
               {% endif %}
@@ -192,7 +193,7 @@
                   <span class="fw-semibold">{{ s.to.name }}</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                  <span class="balance-negative">₹{{ s.amount|floatformat:2 }}</span>
+                  <span class="balance-negative">{{ trip.currency_symbol }}{{ s.amount|floatformat:2 }}</span>
                   <form method="post" action="{% url 'settlement_record' trip.pk %}">
                     {% csrf_token %}
                     <input type="hidden" name="from_member" value="{{ s.from.pk }}">
@@ -204,7 +205,7 @@
               </div>
             {% endfor %}
             <div class="text-end fw-semibold mt-2">
-              Total Settlement: ₹{{ settlement_suggestions|length }} transaction(s)
+              {{ settlement_suggestions|length }} settlement transaction(s)
             </div>
           {% else %}
             <div class="empty-state">
@@ -222,7 +223,7 @@
             {% for r in recorded_settlements %}
               <div class="list-row">
                 <div>{{ r.from_member.name }} <i class="bi bi-arrow-right settlement-arrow"></i> {{ r.to_member.name }}</div>
-                <div class="text-muted small">₹{{ r.amount|floatformat:2 }} &middot; {{ r.settled_on }}</div>
+                <div class="text-muted small">{{ trip.currency_symbol }}{{ r.amount|floatformat:2 }} &middot; {{ r.settled_on }}</div>
               </div>
             {% endfor %}
           </div>

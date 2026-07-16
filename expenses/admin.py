@@ -5,7 +5,7 @@ from .models import Trip, Member, Expense, Settlement
 
 @admin.register(Trip)
 class TripAdmin(admin.ModelAdmin):
-    list_display = ('name', 'destination', 'created_by', 'start_date', 'end_date', 'created_at')
+    list_display = ('name', 'destination', 'currency', 'created_by', 'start_date', 'end_date', 'created_at')
     search_fields = ('name', 'destination', 'created_by__username')
 
 

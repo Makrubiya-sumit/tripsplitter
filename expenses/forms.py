@@ -27,7 +27,7 @@ class RegisterForm(BootstrapFormMixin, UserCreationForm):
 class TripForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Trip
-        fields = ['name', 'destination', 'start_date', 'end_date']
+        fields = ['name', 'destination', 'currency', 'start_date', 'end_date']
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g. Goa Trip'}),
             'destination': forms.TextInput(attrs={'placeholder': 'e.g. Goa, India'}),

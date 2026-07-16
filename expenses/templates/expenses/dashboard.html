@@ -2,37 +2,42 @@
 {% block title %}Dashboard - Trip Expense Splitter{% endblock %}
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<section class="page-hero mb-4">
   <div>
-    <h3 class="fw-bold mb-0">Welcome back, {{ user.username }} 👋</h3>
-    <p class="text-muted mb-0">Here's an overview of your trips.</p>
+    <div class="hero-kicker"><i class="bi bi-stars me-1"></i>Your travel wallet</div>
+    <h1>Ready for the next story, {{ user.username }}?</h1>
+    <p>Keep every shared adventure simple, fair, and beautifully organised.</p>
   </div>
-  <a href="{% url 'trip_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Create Trip</a>
-</div>
+  <a href="{% url 'trip_create' %}" class="btn"><i class="bi bi-plus-lg me-1"></i> Plan a trip</a>
+</section>
 
 <div class="row g-3 mb-4">
   <div class="col-md-4">
-    <div class="stat-card">
-      <div class="stat-label">Total Trips</div>
-      <div class="stat-value">{{ total_trips }}</div>
+    <div class="metric-card">
+      <div class="metric-icon"><i class="bi bi-airplane"></i></div>
+      <div class="metric-label">Adventures</div>
+      <div class="metric-value">{{ total_trips }}</div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="stat-card">
-      <div class="stat-label">Total Members</div>
-      <div class="stat-value">{{ total_members }}</div>
+    <div class="metric-card" style="--metric-color:#098f81;--metric-soft:#def8f4;">
+      <div class="metric-icon"><i class="bi bi-people"></i></div>
+      <div class="metric-label">Travel crew</div>
+      <div class="metric-value">{{ total_members }}</div>
     </div>
   </div>
   <div class="col-md-4">
-    <div class="stat-card">
-      <div class="stat-label">Total Expenses</div>
-      <div class="stat-value">₹{{ total_expenses|floatformat:2 }}</div>
+    <div class="metric-card" style="--metric-color:#e85d47;--metric-soft:#fff0ed;">
+      <div class="metric-icon"><i class="bi bi-wallet2"></i></div>
+      <div class="metric-label">Expenses logged</div>
+      <div class="metric-value">{{ expense_count }}</div>
+      <div class="small text-muted mt-1">Across all your trips</div>
     </div>
   </div>
 </div>
 
 <div class="card">
-  <div class="card-header">Recent Trips</div>
+  <div class="card-header section-heading"><h2>Recent adventures</h2><span>Pick up where you left off</span></div>
   <div class="card-body">
     {% if recent_trips %}
       {% for trip in recent_trips %}
@@ -41,7 +46,7 @@
             <div class="fw-semibold">{{ trip.name }}</div>
             <div class="text-muted small">
               {% if trip.start_date %}{{ trip.start_date }} - {{ trip.end_date }}{% else %}No dates set{% endif %}
-              &middot; {{ trip.member_count }} members &middot; ₹{{ trip.total_expense|floatformat:2 }} spent
+              &middot; {{ trip.member_count }} members &middot; {{ trip.currency_symbol }}{{ trip.total_expense|floatformat:2 }} spent
             </div>
           </div>
           <a href="{% url 'trip_detail' trip.pk %}" class="btn btn-sm btn-outline-primary">View</a>
